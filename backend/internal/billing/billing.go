@@ -2,6 +2,7 @@ package billing
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,16 +14,16 @@ import (
 )
 
 type Service struct {
-	userRepo *user.Repository
-	stripeKey string
+	userRepo      *user.Repository
+	stripeKey     string
 	webhookSecret string
 }
 
 func NewService(userRepo *user.Repository, stripeKey, webhookSecret string) *Service {
 	stripe.Key = stripeKey
 	return &Service{
-		userRepo: userRepo,
-		stripeKey: stripeKey,
+		userRepo:      userRepo,
+		stripeKey:     stripeKey,
 		webhookSecret: webhookSecret,
 	}
 }
@@ -76,14 +77,14 @@ func (s *Service) HandleWebhook(ctx context.Context, payload []byte, sigHeader s
 	switch event.Type {
 	case "checkout.session.completed":
 		var sess stripe.CheckoutSession
-		err := sess.UnmarshalJSON(event.Data.Raw)
+		err := json.Unmarshal(event.Data.Raw, &sess)
 		if err != nil {
 			return err
 		}
 		return s.handleCheckoutCompleted(ctx, &sess)
 	case "customer.subscription.updated", "customer.subscription.deleted":
 		var sub stripe.Subscription
-		err := sub.UnmarshalJSON(event.Data.Raw)
+		err := json.Unmarshal(event.Data.Raw, &sub)
 		if err != nil {
 			return err
 		}
@@ -104,7 +105,7 @@ func (s *Service) handleCheckoutCompleted(ctx context.Context, sess *stripe.Chec
 	if sess.Subscription != nil {
 		subID = sess.Subscription.ID
 	}
-	
+
 	sub := &user.Subscription{
 		UserID:                 userID,
 		PlanType:               "premium",
@@ -126,7 +127,7 @@ func (s *Service) handleSubscriptionUpdated(ctx context.Context, stripeSub *stri
 
 	sub.Status = string(stripeSub.Status)
 	sub.CurrentPeriodEnd = time.Unix(stripeSub.CurrentPeriodEnd, 0)
-	
+
 	return s.userRepo.UpsertSubscription(ctx, sub)
 }
 
