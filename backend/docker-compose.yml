@@ -1,38 +1,42 @@
-version: '3.8'
+# =============================================================================
+# FlowLingo Backend — docker-compose (local development)
+# =============================================================================
+# Start with: docker compose up --build
+# The server will be at http://localhost:8080
+# Health check: http://localhost:8080/v1/health
 
 services:
-  api:
+  app:
     build: .
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=postgres://user:password@db:5432/flowlingo?sslmode=disable
-      - JWT_SECRET=development-secret-12345
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - STRIPE_API_KEY=${STRIPE_API_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - UPSTASH_REDIS_REST_URL=redis://redis:6379
+      DATABASE_URL: "postgresql://flowlingo:flowlingo@db:5432/flowlingo?sslmode=disable"
+      JWT_SECRET: "dev-jwt-secret-change-in-production"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:8080"
+      PORT: "8080"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=flowlingo
+    image: postgres:16-alpine
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: flowlingo
+      POSTGRES_PASSWORD: flowlingo
+      POSTGRES_DB: flowlingo
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowlingo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  pgdata:

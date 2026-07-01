@@ -14,16 +14,16 @@ import (
 )
 
 type Service struct {
-	userRepo      *user.Repository
-	stripeKey     string
+	userRepo *user.Repository
+	stripeKey string
 	webhookSecret string
 }
 
 func NewService(userRepo *user.Repository, stripeKey, webhookSecret string) *Service {
 	stripe.Key = stripeKey
 	return &Service{
-		userRepo:      userRepo,
-		stripeKey:     stripeKey,
+		userRepo: userRepo,
+		stripeKey: stripeKey,
 		webhookSecret: webhookSecret,
 	}
 }
@@ -105,7 +105,7 @@ func (s *Service) handleCheckoutCompleted(ctx context.Context, sess *stripe.Chec
 	if sess.Subscription != nil {
 		subID = sess.Subscription.ID
 	}
-
+	
 	sub := &user.Subscription{
 		UserID:                 userID,
 		PlanType:               "premium",
@@ -127,7 +127,7 @@ func (s *Service) handleSubscriptionUpdated(ctx context.Context, stripeSub *stri
 
 	sub.Status = string(stripeSub.Status)
 	sub.CurrentPeriodEnd = time.Unix(stripeSub.CurrentPeriodEnd, 0)
-
+	
 	return s.userRepo.UpsertSubscription(ctx, sub)
 }
 

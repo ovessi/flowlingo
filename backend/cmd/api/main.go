@@ -65,12 +65,6 @@ func main() {
 
     mux := http.NewServeMux()
 
-    // Health check
-    mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("OK"))
-    })
-
     mux.HandleFunc("POST /v1/auth/register", handler.Register)
     mux.HandleFunc("POST /v1/auth/login", handler.Login)
 
@@ -93,6 +87,11 @@ func main() {
     mux.HandleFunc("POST /v1/billing/webhook", handler.StripeWebhook)
     mux.HandleFunc("GET /v1/billing/pricing", handler.GetPricing)
 
+    // Health endpoint (no auth required)
+    mux.HandleFunc("GET /v1/health", handler.Health)
+
+    // Wrap everything with CORS
+    corsHandler := api.CORSMiddleware(mux)
 
     port := os.Getenv("PORT")
     if port == "" {
@@ -101,7 +100,7 @@ func main() {
 
     srv := &http.Server{
         Addr:         ":" + port,
-        Handler:      api.CorsMiddleware(mux),
+        Handler:      corsHandler,
         ReadTimeout:  10 * time.Second,
         WriteTimeout: 10 * time.Second,
         IdleTimeout:  120 * time.Second,

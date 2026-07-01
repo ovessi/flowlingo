@@ -368,6 +368,26 @@ func (h *Handler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
     h.GetProfile(w, r)
 }
 
+func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+    dbStatus := "connected"
+    if err := h.userRepo.Ping(r.Context()); err != nil {
+        dbStatus = "disconnected"
+    }
+
+    aiStatus := map[string]string{}
+    if h.aiService != nil {
+        aiStatus = h.aiService.GetProvidersStatus()
+    }
+
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "status":       "ok",
+        "timestamp":    time.Now().UTC().Format(time.RFC3339),
+        "version":      "1.0.0",
+        "database":     dbStatus,
+        "ai_providers": aiStatus,
+    })
+}
+
 func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         authHeader := r.Header.Get("Authorization")

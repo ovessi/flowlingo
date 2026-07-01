@@ -1,32 +1,40 @@
+# =============================================================================
+# FlowLingo Backend — Multi-stage Docker Build
+# =============================================================================
 # Build stage
 FROM golang:1.23-alpine AS builder
 
+RUN apk add --no-cache git ca-certificates
+
 WORKDIR /app
 
-# Copy go mod and sum files
+# Cache dependencies first
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy source code
+# Build the binary
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/migrate ./cmd/migrate
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/api/main.go
+# Runtime stage
+FROM alpine:3.20
 
-# Final stage
-FROM alpine:latest
+RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy binary from build stage
-COPY --from=builder /app/main .
-# Copy migrations
+# Copy the migration files
 COPY --from=builder /app/migrations ./migrations
+# Copy the binaries
+COPY --from=builder /app/server .
+COPY --from=builder /app/migrate .
 
-# Expose port
 EXPOSE 8080
 
-# Run the application
-CMD ["./main"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/v1/health || exit 1
+
+# Run migrations on startup, then start the server
+CMD ["./server"]

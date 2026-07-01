@@ -1,89 +1,109 @@
 # FlowLingo Backend
 
-Foundational API server for FlowLingo built with Go.
+The backend engine for FlowLingo, providing AI-powered translation, cultural analysis, and subscription management.
 
 ## Stack
-- Go (1.23+)
-- PostgreSQL (Neon in Production, SQLite fallback for Local)
-- JWT Authentication
-- Multi-LLM Orchestration (OpenAI, Anthropic, Gemini)
-- Redis Caching
-- Dockerized for Deployment
+- **Language:** Go 1.25+
+- **Database:** PostgreSQL (Neon) with `sqlx` and `pq`
+- **Cache:** Redis (Upstash)
+- **AI Orchestration:** Multi-provider failover (OpenAI, Anthropic, Gemini)
+- **Authentication:** JWT-based with social login support
 
-## Structure
-- `cmd/api`: Main API server
-- `cmd/migrate`: Simple migration runner
-- `internal/api`: HTTP handlers, middleware (CORS, Auth)
-- `internal/auth`: JWT and Password logic
-- `internal/db`: Database connection setup
-- `internal/user`: User models and repository
-- `migrations`: SQL migration files
+## Quick Start (Local Development)
 
-## Development
+### Prerequisites
+- Go 1.25 or higher
+- Docker and Docker Compose
+- A Postgres database (or use the one in Docker Compose)
 
-### Setup
-1. Copy `.env.example` to `.env` and fill in your keys.
-2. Run with Docker Compose:
-   ```bash
-   docker-compose up --build
-   ```
-   OR locally:
-   ```bash
-   go run ./cmd/api/main.go
-   ```
-
-### Database Migrations
-To apply migrations locally:
+### 1. Configure Environment
+Copy the example environment file and fill in your keys:
 ```bash
-go run ./cmd/migrate/main.go
+cp .env.example .env
 ```
+
+### 2. Start Infrastructure
+Start the database and Redis using Docker Compose:
+```bash
+docker compose up -d db redis
+```
+
+### 3. Run Migrations
+Apply the database schema:
+```bash
+go run cmd/migrate/main.go
+```
+
+### 4. Run the Server
+```bash
+go run cmd/api/main.go
+```
+The API will be available at `http://localhost:8080`.
 
 ## Production Deployment
 
-### 1. Docker
-The repository includes a `Dockerfile` for containerized environments.
-```bash
-docker build -t flowlingo-backend .
-docker run -p 8080:8080 --env-file .env flowlingo-backend
-```
+### Railway
+1. Connect your GitHub repository to Railway.
+2. Railway will automatically detect the `railway.json` and `Dockerfile`.
+3. Add the required environment variables in the Railway dashboard.
 
-### 2. Platform Specifics
-- **Railway**: Uses the provided `railway.json`. Connect your GitHub repo, and it will automatically detect the Dockerfile.
-- **Render/Fly.io**: Point to the `Dockerfile` and ensure `PORT` environment variable is set.
+### Render
+1. Create a new "Web Service" on Render.
+2. Connect your repository.
+3. Select "Docker" as the runtime.
+4. Render will use `render.yaml` for configuration.
 
-### 3. Production Database & Migrations
-When deploying to production (e.g., Neon Postgres):
-1. Set the `DATABASE_URL` environment variable.
-2. Run the migration tool as a one-off job or entrypoint task:
-   ```bash
-   go run ./cmd/migrate/main.go
-   ```
+### Fly.io
+1. Install the Fly CLI and run `fly launch`.
+2. Fly.io will use `fly.toml` and the `Dockerfile`.
 
 ## Environment Variables
-- `PORT`: Port to listen on (default 8080).
-- `DATABASE_URL`: Postgres DSN.
-- `JWT_SECRET`: Secret for signing JWTs.
-- `UPSTASH_REDIS_REST_URL`: Redis connection string.
-- `OPENAI_API_KEY`: API key for OpenAI.
-- `ANTHROPIC_API_KEY`: API key for Anthropic.
-- `GOOGLE_API_KEY`: API key for Google Gemini.
-- `STRIPE_API_KEY`: API key for Stripe.
-- `STRIPE_WEBHOOK_SECRET`: Secret for Stripe webhooks.
-
-## AI Features
-- **Multi-LLM Abstraction**: Supports OpenAI, Anthropic, and Gemini.
-- **Failover**: Automatically retries with the next provider if one fails.
-- **Caching**: Results cached for 24h.
-- **PII Scrubbing**: Masks sensitive data before AI processing.
-- **Rate Limiting**: Enforces usage tiers.
+Refer to `.env.example` for a full list of required and optional variables. Key variables include:
+- `DATABASE_URL`: Your Postgres connection string.
+- `JWT_SECRET`: Secret key for signing authentication tokens.
+- `OPENAI_API_KEY`: Primary AI provider key.
+- `CORS_ORIGINS`: Comma-separated list of allowed frontend origins.
 
 ## API Endpoints
-- `GET /health`: Health check
-- `POST /v1/auth/register`: Register a new user
-- `POST /v1/auth/login`: Login and get JWT
-- `POST /v1/ai/translate`: Translate text (Auth required)
-- `POST /v1/ai/analyze`: Cultural context & suggestions (Auth required)
-- `GET /v1/user/profile`: Get profile (Auth required)
-- `PATCH /v1/user/settings`: Update settings (Auth required)
-- `GET /v1/billing/pricing`: Get available plans
-- `POST /v1/billing/create-checkout`: Create Stripe session (Auth required)
+
+### Authentication
+- `POST /v1/auth/register` - Email registration
+- `POST /v1/auth/login` - Email login
+- `POST /v1/auth/social` - Social login (Google/Apple)
+
+### AI Actions
+- `POST /v1/ai/translate` - Natural language translation with tone control
+- `POST /v1/ai/analyze` - Cultural context and reply suggestions
+
+### User
+- `GET /v1/user/profile` - Get user details and preferences
+- `PATCH /v1/user/settings` - Update language and tone preferences
+- `GET /v1/user/memory` - View AI-learned preferences
+
+### System
+- `GET /v1/health` - Health check and system status
+
+## Architecture
+- **Multi-LLM Failover:** The AI service automatically tries OpenAI, then Anthropic, then Gemini to ensure high availability.
+- **PII Scrubbing:** All user text is scrubbed for personally identifiable information before being sent to third-party AI providers.
+- **Tiered Rate Limiting:** Free users are limited to 5 AI actions per day, while premium users have unlimited access.
+- **Vector Memory:** User preferences are stored and retrieved using vector embeddings to personalize AI responses.
+
+## Verification
+To verify a deployment, call the health endpoint:
+```bash
+curl https://your-backend-api.com/v1/health
+```
+Expected response:
+```json
+{
+  "status": "ok",
+  "version": "1.0.0",
+  "database": "connected",
+  "ai_providers": {
+    "openai": "configured",
+    "anthropic": "configured",
+    "gemini": "configured"
+  }
+}
+```

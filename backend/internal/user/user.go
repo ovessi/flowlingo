@@ -180,5 +180,9 @@ func (r *Repository) LogAction(ctx context.Context, id, userID uuid.UUID, action
     return err
 }
 
+func (r *Repository) Ping(ctx context.Context) error {
+    return r.db.PingContext(ctx)
+}
+
 
 

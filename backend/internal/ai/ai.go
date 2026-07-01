@@ -125,3 +125,23 @@ func (s *Service) Embed(ctx context.Context, text string) ([]float32, error) {
     return nil, fmt.Errorf("all providers failed to generate embedding")
 }
 
+func (s *Service) GetProvidersStatus() map[string]string {
+    status := map[string]string{
+        "openai":    "missing",
+        "anthropic": "missing",
+        "gemini":    "missing",
+    }
+
+    for _, p := range s.providers {
+        switch p.Name() {
+        case "openai":
+            status["openai"] = "configured"
+        case "anthropic":
+            status["anthropic"] = "configured"
+        case "gemini":
+            status["gemini"] = "configured"
+        }
+    }
+    return status
+}
+
