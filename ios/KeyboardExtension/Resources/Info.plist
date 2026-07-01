@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSExtension</key>
+    <dict>
+        <key>NSExtensionAttributes</key>
+        <dict>
+            <key>IsAccessoryView</key>
+            <false/>
+            <key>PrefersRightToLeft</key>
+            <false/>
+            <key>PrimaryLanguage</key>
+            <string>en</string>
+            <key>RequestsOpenAccess</key>
+            <true/>
+        </dict>
+        <key>NSExtensionPointIdentifier</key>
+        <string>com.apple.keyboard-service</string>
+        <key>NSExtensionPrincipalClass</key>
+        <string>$(PRODUCT_MODULE_NAME).KeyboardViewController</string>
+    </dict>
+    
+    <!-- Privacy Descriptions -->
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>FlowLingo uses notifications to inform you about AI analysis results.</string>
+    
+    <!-- Full Access Note: Only used for network requests when user explicitly triggers AI actions -->
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>FlowLingo uses speech recognition for voice input features.</string>
+    
+    <key>NSCameraUsageDescription</key>
+    <string>FlowLingo uses the camera to translate text from images (OCR).</string>
+</dict>
+</plist>
