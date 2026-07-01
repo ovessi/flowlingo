@@ -65,6 +65,12 @@ func main() {
 
     mux := http.NewServeMux()
 
+    // Health check
+    mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("OK"))
+    })
+
     mux.HandleFunc("POST /v1/auth/register", handler.Register)
     mux.HandleFunc("POST /v1/auth/login", handler.Login)
 
@@ -95,7 +101,7 @@ func main() {
 
     srv := &http.Server{
         Addr:         ":" + port,
-        Handler:      mux,
+        Handler:      api.CorsMiddleware(mux),
         ReadTimeout:  10 * time.Second,
         WriteTimeout: 10 * time.Second,
         IdleTimeout:  120 * time.Second,
