@@ -1,5 +1,6 @@
 name: iOS Build
 on:
+workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -8,6 +9,7 @@ on:
     branches: [main]
     paths:
       - 'ios/**'
+      - '.github/workflows/ios-build.yml'
 jobs:
   build:
     runs-on: macos-15
