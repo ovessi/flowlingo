@@ -1,0 +1,144 @@
+name: FlowLingo
+options:
+  bundleIdPrefix: com.flowlingo
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  SWIFT_VERSION: "5.9"
+  DEVELOPMENT_TEAM: ""  # Set your Apple Team ID here
+  CODE_SIGN_STYLE: Manual
+  CODE_SIGN_IDENTITY: Apple Development
+
+targets:
+  FlowLingo:
+    type: application
+    platform: iOS
+    sources:
+      - path: FlowLingo
+        type: group
+    info:
+      path: FlowLingo/Info.plist
+      properties:
+        CFBundleDisplayName: FlowLingo
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        LSRequiresIPhoneOS: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSupportsIndirectInputEvents: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.flowlingo.app
+      INFOPLIST_FILE: FlowLingo/Info.plist
+      TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - target: FlowLingoShared
+    preBuildScripts:
+      - name: Copy Shared Models
+        script: |
+          rsync -av --delete ../Shared/ ./Shared/
+        basedOnDependencyAnalysis: false
+
+  FlowLingoKeyboard:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KeyboardExtension
+        type: group
+    info:
+      path: KeyboardExtension/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: FlowLingo
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER).keyboard
+        NSExtension:
+          NSExtensionAttributes:
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+            PrimaryLanguage: en-US
+            RequestsOpenAccess: true
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: KeyboardViewController
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.flowlingo.app.keyboard
+      INFOPLIST_FILE: KeyboardExtension/Resources/Info.plist
+    dependencies:
+      - target: FlowLingoShared
+
+  FlowLingoShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+        type: group
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: FlowLingo
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER).share
+        NSExtension:
+          NSExtensionAttributes:
+            NSExtensionActivationRule: TRUEPREDICATE
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: ShareViewController
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.flowlingo.app.share
+      INFOPLIST_FILE: ShareExtension/Info.plist
+    dependencies:
+      - target: FlowLingoShared
+
+  FlowLingoWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: WidgetExtension
+        type: group
+    info:
+      path: WidgetExtension/Info.plist
+      properties:
+        CFBundleDisplayName: FlowLingo
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER).widget
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.flowlingo.app.widget
+      INFOPLIST_FILE: WidgetExtension/Info.plist
+    dependencies:
+      - target: FlowLingoShared
+
+  FlowLingoShared:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Shared
+        type: group
+    info:
+      path: Shared/Info.plist
+      properties:
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER).shared
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.flowlingo.app.shared
+      INFOPLIST_FILE: Shared/Info.plist
+      APPLICATION_EXTENSION_API_ONLY: true
+
+schemes:
+  FlowLingo:
+    build:
+      targets:
+        FlowLingo: all
+        FlowLingoKeyboard: all
+        FlowLingoShare: all
+        FlowLingoWidget: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
