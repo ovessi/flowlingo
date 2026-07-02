@@ -1,0 +1,39 @@
+workflows:
+  ios-build:
+    name: FlowLingo iOS
+    max_build_duration: 30
+    environment:
+      ios_signing:
+        provisioning_profiles:
+          - profile_name: FlowLingo Development
+        certificates:
+          - certificate_name: Apple Development
+      vars:
+        APP_ID: com.flowlingo.app
+        XCODE_WORKSPACE: "FlowLingo.xcodeproj"
+        XCODE_SCHEME: "FlowLingo"
+      groups:
+        - app_store_credentials
+    scripts:
+      - name: Install XcodeGen
+        script: brew install xcodegen
+
+      - name: Generate Xcode project
+        script: xcodegen generate --spec project.yml
+
+      - name: Build iOS
+        script: |
+          xcodebuild build \
+            -project "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty
+
+    artifacts:
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+    publishing:
+      email:
+        recipients:
+          - owner@flowlingo.ai
