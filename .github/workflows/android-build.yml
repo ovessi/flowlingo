@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'android/**'
+      - '.github/workflows/android-build.yml'
   pull_request:
     branches: [main]
     paths:
       - 'android/**'
+      - '.github/workflows/android-build.yml'
 
 jobs:
   build:
