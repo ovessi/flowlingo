@@ -66,4 +66,6 @@ dependencies {
 
     // ML Kit for Language Detection
     implementation 'com.google.mlkit:language-id:17.0.4'
+    // Material Components (for XML theme resources)
+    implementation 'com.google.android.material:material:1.11.0'
 }
