@@ -23,9 +23,10 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Clean stale Xcode project
+        run: rm -rf FlowLingo.xcodeproj
       - name: Generate Xcode project
         run: xcodegen generate --spec project.yml
-          rm -rf ios/FlowLingo.xcodeproj
 
       - name: Show schemes
         run: xcodebuild -list -project FlowLingo.xcodeproj
