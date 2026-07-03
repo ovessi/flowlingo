@@ -56,7 +56,7 @@ func (p *GeminiProvider) Translate(ctx context.Context, req TranslationRequest) 
 func (p *GeminiProvider) Analyze(ctx context.Context, req AnalysisRequest) (*AnalysisResponse, error) {
     model := p.client.GenerativeModel(p.model)
     // Force JSON response
-    model.ResponseMIMEType = "application/json"
+    
 
     prompt := fmt.Sprintf(
         "Analyze the following text in %s. Provide cultural context, slang explanation, and 3 suggested replies in different tones (casual, friendly, professional). Return as JSON format:\n\n{ \"analysis\": \"...\", \"suggested_replies\": [\"...\", \"...\", \"...\"] }\n\nText: %s",
