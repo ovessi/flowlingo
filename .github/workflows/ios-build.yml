@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     defaults:
       run:
         working-directory: ./ios
@@ -29,9 +29,6 @@ jobs:
         run: rm -rf FlowLingo.xcodeproj
       - name: Generate Xcode project
         run: xcodegen generate --spec project.yml
-
-      - name: Show schemes
-        run: xcodebuild -list -project FlowLingo.xcodeproj
 
       - name: Build for iOS Simulator
         run: |
