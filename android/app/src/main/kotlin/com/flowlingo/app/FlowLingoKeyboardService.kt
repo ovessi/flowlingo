@@ -26,9 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewTreeLifecycleOwner
-import androidx.compose.ui.platform.ViewTreeViewModelStoreOwner
+import androidx.lifecycle.ViewTreeLifecycleOwner
+import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,7 +68,7 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
 
     // Lifecycle handling for Compose in Service
     private val lifecycleRegistry = LifecycleRegistry(this)
-    private val viewModelStore = ViewModelStore()
+    private val viewModelStoreBacking = ViewModelStore()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
     override fun onCreate() {
@@ -113,10 +114,8 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
 
     // --- Lifecycle and Store Provider Implementations ---
     override val lifecycle: Lifecycle get() = lifecycleRegistry
-    override val viewModelStore: ViewModelStore get() = viewModelStoreStore
+    override val viewModelStore: ViewModelStore get() = viewModelStoreBacking
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
-
-    private val viewModelStoreStore = ViewModelStore()
 
     private fun handleKey(key: String) {
         val ic = currentInputConnection ?: return
