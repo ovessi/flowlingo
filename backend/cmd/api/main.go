@@ -23,7 +23,10 @@ func main() {
 
     secret := os.Getenv("JWT_SECRET")
     if secret == "" {
-        secret = "default-secret-for-development"
+        log.Fatal("JWT_SECRET environment variable is required. Generate one with: openssl rand -base64 32")
+    }
+    if secret == "default-secret-for-development" {
+        log.Fatal("JWT_SECRET is set to the insecure default. Generate a strong secret with: openssl rand -base64 32")
     }
 
     database, err := db.NewDB(dsn)
@@ -65,8 +68,8 @@ func main() {
 
     mux := http.NewServeMux()
 
-    mux.HandleFunc("POST /v1/auth/register", handler.Register)
-    mux.HandleFunc("POST /v1/auth/login", handler.Login)
+    mux.HandleFunc("POST /v1/auth/register", api.AuthRateLimitMiddleware(handler.Register))
+    mux.HandleFunc("POST /v1/auth/login", api.AuthRateLimitMiddleware(handler.Login))
 
     // AI routes
     mux.Handle("POST /v1/ai/translate", handler.AuthMiddleware(http.HandlerFunc(handler.Translate)))

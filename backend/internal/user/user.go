@@ -98,24 +98,17 @@ func (r *Repository) GetByAppleID(ctx context.Context, appleID string) (*User, e
 }
 
 func (r *Repository) Update(ctx context.Context, u *User) error {
+    now := time.Now()
     query := `
         UPDATE users
-        SET native_language = :native_language, default_tone = :default_tone, updated_at = NOW()
-        WHERE id = :id
+        SET native_language = $1, default_tone = $2, updated_at = $3
+        WHERE id = $4
         RETURNING updated_at
     `
-    rows, err := r.db.NamedQueryContext(ctx, query, u)
-    if err != nil {
+    row := r.db.QueryRowContext(ctx, query, u.NativeLanguage, u.DefaultTone, now, u.ID)
+    if err := row.Scan(&u.UpdatedAt); err != nil {
         return err
     }
-    defer rows.Close()
-
-    if rows.Next() {
-        if err := rows.Scan(&u.UpdatedAt); err != nil {
-            return err
-        }
-    }
-
     return nil
 }
 
