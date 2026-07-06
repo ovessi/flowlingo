@@ -13,6 +13,7 @@ import (
 
 type DB struct {
     *sqlx.DB
+    Driver string
 }
 
 func NewDB(dsn string) (*DB, error) {
@@ -41,6 +42,21 @@ func NewDB(dsn string) (*DB, error) {
         return nil, fmt.Errorf("error pinging db: %w", err)
     }
 
-    return &DB{db}, nil
+    return &DB{DB: db, Driver: driver}, nil
 }
 
+// NowExpr returns the database-appropriate SQL expression for current timestamp.
+func (d *DB) NowExpr() string {
+    if d.Driver == "sqlite3" {
+        return "datetime('now')"
+    }
+    return "NOW()"
+}
+
+// NowBind returns the current time as a value for named query binds.
+func (d *DB) NowBind() interface{} {
+    if d.Driver == "sqlite3" {
+        return time.Now().UTC().Format("2006-01-02 15:04:05")
+    }
+    return time.Now()
+}

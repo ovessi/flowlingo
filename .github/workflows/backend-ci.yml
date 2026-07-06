@@ -34,6 +34,9 @@ jobs:
       - name: Go mod download
         run: go mod download
 
+      - name: Go mod verify
+        run: go mod verify
+
       - name: Go build (API server)
         run: go build -o /dev/null ./cmd/api/...
 
@@ -42,3 +45,22 @@ jobs:
 
       - name: Go vet
         run: go vet ./...
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: flowlingo/backend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

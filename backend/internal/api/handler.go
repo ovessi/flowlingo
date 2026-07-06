@@ -3,6 +3,7 @@ package api
 import (
     "context"
     "encoding/json"
+    "fmt"
     "net/http"
     "strings"
     "time"
@@ -100,6 +101,9 @@ func (h *Handler) Translate(w http.ResponseWriter, r *http.Request) {
         creditsRemaining = 9999 // Unlimited
     }
 
+    w.Header().Set("X-RateLimit-Limit", "5")
+    w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", creditsRemaining))
+    w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", time.Now().Add(24*time.Hour).Unix()))
 
     json.NewEncoder(w).Encode(map[string]interface{}{
         "translated_text":   resp.TranslatedText,
