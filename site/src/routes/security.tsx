@@ -2,6 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout } from "../components/LegalLayout";
 
 export const Route = createFileRoute("/security")({
+  head: () => ({
+    meta: [
+      { title: "Security — FlowLingo" },
+      { name: "description", content: "FlowLingo's security architecture: end-to-end encryption, privacy-by-design principles, PII redaction, and compliance with GDPR, CCPA, and SOC 2 standards." },
+    ],
+  }),
   component: SecurityPage,
 });
 

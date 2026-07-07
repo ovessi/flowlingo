@@ -6,6 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 export const Route = createFileRoute("/pricing")({
+  head: () => ({
+    meta: [
+      { title: "Pricing — FlowLingo AI Keyboard" },
+      { name: "description", content: "Choose the right FlowLingo plan: Free (5 AI actions/day), Premium ($9.99/mo unlimited), Family, or Enterprise. All plans include 50+ language support." },
+      { property: "og:title", content: "Pricing — FlowLingo" },
+      { property: "og:description", content: "Start free, upgrade when you need more. Unlimited AI actions, tone profiles, offline packs, and more." },
+    ],
+  }),
   component: PricingPage,
 });
 

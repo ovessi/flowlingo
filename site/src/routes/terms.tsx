@@ -3,6 +3,12 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
 export const Route = createFileRoute("/terms")({
+  head: () => ({
+    meta: [
+      { title: "Terms of Service — FlowLingo" },
+      { name: "description", content: "FlowLingo's terms of service govern your use of the AI keyboard platform, including subscription terms, acceptable use, and limitations of liability." },
+    ],
+  }),
   component: TermsPage,
 });
 

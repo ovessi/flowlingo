@@ -5,6 +5,14 @@ import { motion } from "framer-motion";
 import { Languages, MessageSquareText, Zap, Shield, Globe, Sparkles, Cpu, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/features")({
+  head: () => ({
+    meta: [
+      { title: "Features — FlowLingo AI Keyboard" },
+      { name: "description", content: "Explore FlowLingo's AI-powered features: real-time translation across 50+ languages, adaptive tone control, context analysis, smart replies, and privacy-first architecture." },
+      { property: "og:title", content: "Features — FlowLingo AI Keyboard" },
+      { property: "og:description", content: "Real-time translation, tone adjustment, context analysis, smart replies, and more — all from your keyboard." },
+    ],
+  }),
   component: FeaturesPage,
 });
 
@@ -18,37 +26,51 @@ const mainFeatures = [
   },
   {
     name: "Adaptive Tone Control",
-    description: "Whether it's a professional email or a casual text, toggle between Formal, Friendly, Urgent, or Casual tones with a tap.",
+    description: "Switch between Professional, Casual, Friendly, or Assertive tones with a simple toggle. The AI adjusts word choice, formality, and cultural nuances automatically.",
     icon: MessageSquareText,
     color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   {
     name: "Context Analysis",
-    description: "Receive a message you don't fully understand? Copy it to see an AI breakdown of slang, cultural nuances, and intent.",
+    description: "Copy a message from any app and get an instant breakdown of slang, idioms, and cultural context. Never miss a nuance again.",
     icon: Zap,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
   {
-    name: "AI-Powered Replies",
-    description: "FlowLingo suggests 3 contextually relevant replies for every message you receive, helping you keep the conversation flowing.",
+    name: "AI Reply Suggestions",
+    description: "Get three contextually relevant reply suggestions based on the conversation. Tap to insert, perfect every time.",
     icon: Sparkles,
-    color: "text-indigo-500",
-    bg: "bg-indigo-500/10",
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
+  },
+  {
+    name: "Global Language Coverage",
+    description: "Support for 50+ languages including English, Spanish, French, German, Japanese, Chinese, Arabic, Portuguese, and Hindi.",
+    icon: Globe,
+    color: "text-cyan-500",
+    bg: "bg-cyan-500/10",
+  },
+  {
+    name: "Privacy by Design",
+    description: "No keystroke logging. Data is encrypted in transit and at rest. AI processing only happens when you explicitly trigger an action.",
+    icon: Shield,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
   },
 ];
 
 const techFeatures = [
   {
-    name: "Privacy-First Architecture",
-    description: "Your data is processed locally whenever possible and encrypted end-to-end. We never store your keystrokes.",
-    icon: Shield,
+    name: "Localization Engine",
+    description: "Auto-adjusts dates, currencies, and units of measure to the target culture. A date isn't just translated — it's localized.",
+    icon: Cpu,
   },
   {
-    name: "Smart Localization",
-    description: "Automatically adjusts dates, currency symbols, and units of measure to match the culture of your recipient.",
-    icon: Globe,
+    name: "Tone Profiles",
+    description: "Save custom tone profiles for different contexts: work emails, casual chats, formal documents. Switch with one tap.",
+    icon: MessageSquareText,
   },
   {
     name: "Personal Dictionary",
@@ -131,7 +153,7 @@ function FeaturesPage() {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold mb-8 italic">See FlowLingo in action.</h2>
               <p className="text-xl opacity-90 mb-12 max-w-2xl mx-auto">
-                Join 500,000+ users who have removed language barriers from their daily communication.
+                Sign up for beta access and be among the first to experience communication without barriers.
               </p>
               <button className="bg-white text-primary px-12 py-5 rounded-standard font-bold text-lg hover:bg-opacity-90 transition-all">
                 Download Now
