@@ -1,9 +1,12 @@
 package com.flowlingo.app
 
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
+import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -126,12 +129,28 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
                     ic.commitText("", 1)
                 }
             }
+            "GLOBE" -> handleGlobeKey()
             "SHIFT" -> { /* Handled in UI state */ }
             "123", "?123", "LET" -> { /* Handled in UI state */ }
             "SPACE" -> commitText(" ")
             "ENT" -> ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
             "EMOJI" -> commitText("😊") // Default emoji for now
             else -> commitText(key)
+        }
+    }
+
+    /**
+     * Handles the globe key press by cycling to the next input method.
+     * On Android, this is typically done via switchToNextInputMethod().
+     */
+    private fun handleGlobeKey() {
+        val imeManager = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+        if (imeManager != null) {
+            // switchToNextInputMethod switches to the next IME in the rotation
+            imeManager.switchToNextInputMethod(
+                binding?.iuid?.token ?: return,
+                false // do not reset the IME picker rotation
+            )
         }
     }
 
@@ -213,10 +232,10 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
                                 delay(1000)
                                 suggestions = listOf("Hey!", "Doing great.", "Not much.")
                                 analysisResult = AnalyzeResponse(
-                                    translation = "Eso es mentira, de verdad.",
-                                    cultural_explanation = "Gen-Z slang popular in digital communication.",
-                                    slang_breakdown = "'Cap' = lie, 'fr' = for real.",
-                                    tone_analysis = "Casual and informal.",
+                                    translation = "This is a mock translation while the server is unavailable.",
+                                    cultural_explanation = "AI-based cultural analysis requires a server connection.",
+                                    slang_breakdown = "AI-based slang analysis requires a server connection.",
+                                    tone_analysis = "AI-based tone analysis requires a server connection.",
                                     suggested_replies = suggestions
                                 )
                             } finally {
@@ -262,12 +281,12 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
                             analysisResult = response
                         } catch (e: Exception) {
                             delay(1000)
-                            suggestions = listOf("Localized reply 1", "Localized reply 2")
+                            suggestions = listOf("Reply option 1", "Reply option 2")
                             analysisResult = AnalyzeResponse(
-                                translation = "Translation of: $textToAnalyze",
-                                cultural_explanation = "Cultural context for the message.",
-                                slang_breakdown = "No slang detected.",
-                                tone_analysis = "Neutral/Casual",
+                                translation = "Mock translation (server unavailable).",
+                                cultural_explanation = "Connect to server for cultural analysis.",
+                                slang_breakdown = "No slang analysis available offline.",
+                                tone_analysis = "Tone analysis requires server connection.",
                                 suggested_replies = suggestions
                             )
                         } finally {
@@ -550,7 +569,11 @@ class FlowLingoKeyboardService : InputMethodService(), LifecycleOwner, ViewModel
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = { /* Settings Action */ }) {
+                IconButton(onClick = {
+                    val intent = Intent(this@FlowLingoKeyboardService, SettingsActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",

@@ -1,6 +1,8 @@
 package com.flowlingo.app
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -120,7 +122,10 @@ fun SetupScreen() {
         SetupStep(number = 2, text = "Select FlowLingo as default method")
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = { /* Intent to open keyboard settings */ },
+            onClick = {
+                val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
+                context.startActivity(intent)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Go to Settings")
@@ -156,6 +161,19 @@ fun SetupStep(number: Int, text: String) {
 fun SettingsScreen(prefsManager: PreferencesManager) {
     var clipboardEnabled by remember { mutableStateOf(prefsManager.isClipboardDetectionEnabled()) }
     var hapticsEnabled by remember { mutableStateOf(prefsManager.isHapticsEnabled()) }
+    var showToneDialog by remember { mutableStateOf(false) }
+    var selectedTone by remember { mutableStateOf(prefsManager.getDefaultTone().replaceFirstChar { it.uppercase() }) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var selectedLanguage by remember { mutableStateOf(prefsManager.getTargetLanguage().uppercase()) }
+    val context = LocalContext.current
+
+    val toneOptions = listOf("Casual", "Formal", "Friendly", "Urgent")
+    val languageOptions = listOf(
+        "ES" to "Spanish", "FR" to "French", "DE" to "German",
+        "JA" to "Japanese", "KO" to "Korean", "ZH" to "Chinese",
+        "PT" to "Portuguese", "IT" to "Italian", "RU" to "Russian",
+        "AR" to "Arabic", "HI" to "Hindi", "EN" to "English"
+    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -197,24 +215,85 @@ fun SettingsScreen(prefsManager: PreferencesManager) {
         item {
             SettingItem(
                 title = "Default Tone",
-                subtitle = prefsManager.getDefaultTone().capitalize(),
-                icon = Icons.Default.Tune
+                subtitle = selectedTone,
+                icon = Icons.Default.Tune,
+                onClick = { showToneDialog = true }
             )
         }
         item {
             SettingItem(
                 title = "Target Language",
-                subtitle = prefsManager.getTargetLanguage().uppercase(),
-                icon = Icons.Default.Translate
+                subtitle = selectedLanguage,
+                icon = Icons.Default.Translate,
+                onClick = { showLanguageDialog = true }
             )
         }
         item {
             SettingItem(
                 title = "Camera Translation",
                 subtitle = "Setup ML Kit OCR",
-                icon = Icons.Default.CameraAlt
+                icon = Icons.Default.CameraAlt,
+                onClick = { /* Camera setup handled in CameraTranslationScreen tab */ }
             )
         }
+    }
+
+    // Tone selection dialog
+    if (showToneDialog) {
+        AlertDialog(
+            onDismissRequest = { showToneDialog = false },
+            title = { Text("Select Default Tone") },
+            text = {
+                LazyColumn {
+                    items(toneOptions.size) { index ->
+                        val tone = toneOptions[index]
+                        ListItem(
+                            headlineContent = { Text(tone) },
+                            modifier = Modifier.clickable {
+                                selectedTone = tone
+                                prefsManager.setDefaultTone(tone.lowercase())
+                                showToneDialog = false
+                            }
+                        )
+                        if (index < toneOptions.size - 1) Divider()
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showToneDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Language selection dialog
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text("Select Target Language") },
+            text = {
+                LazyColumn {
+                    items(languageOptions.size) { index ->
+                        val (code, name) = languageOptions[index]
+                        ListItem(
+                            headlineContent = { Text("$name ($code)") },
+                            modifier = Modifier.clickable {
+                                selectedLanguage = code
+                                prefsManager.setTargetLanguage(code.lowercase())
+                                showLanguageDialog = false
+                            }
+                        )
+                        if (index < languageOptions.size - 1) Divider()
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -244,11 +323,11 @@ fun SettingToggle(
 }
 
 @Composable
-fun SettingItem(title: String, subtitle: String, icon: ImageVector) {
+fun SettingItem(title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Handle click */ }
+            .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
