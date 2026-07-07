@@ -3,6 +3,12 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
 export const Route = createFileRoute("/privacy")({
+  head: () => ({
+    meta: [
+      { title: "Privacy Policy — FlowLingo" },
+      { name: "description", content: "FlowLingo's privacy policy: how we handle your data, keyboard Full Access transparency, encryption standards, and your rights under GDPR and CCPA." },
+    ],
+  }),
   component: PrivacyPage,
 });
 
