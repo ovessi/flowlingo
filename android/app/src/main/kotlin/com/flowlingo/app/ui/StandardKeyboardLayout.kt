@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,7 +57,7 @@ fun StandardKeyboardLayout(
         listOf("?123", "™", "®", "©", "¶", "\\", "¡", "¿", "DEL")
     )
 
-    val bottomRow = listOf("?123", "emoji", ",", "SPACE", ".", "ENT")
+    val bottomRow = listOf("GLOBE", "?123", "emoji", ",", "SPACE", ".", "ENT")
 
     var gesturePoints by remember { mutableStateOf(listOf<Offset>()) }
 
@@ -119,7 +120,7 @@ fun StandardKeyboardLayout(
                 bottomRow.forEach { key ->
                     val weight = when (key) {
                         "SPACE" -> 4f
-                        "ENT", "?123" -> 1.5f
+                        "ENT", "?123", "GLOBE" -> 1.5f
                         else -> 1f
                     }
                     
@@ -139,6 +140,7 @@ fun StandardKeyboardLayout(
                                         }
                                     }
                                     "emoji" -> onKeyClick("EMOJI")
+                                    "GLOBE" -> onKeyClick("GLOBE")
                                     else -> onKeyClick(key)
                                 }
                             },
@@ -148,6 +150,11 @@ fun StandardKeyboardLayout(
                             "emoji" -> Icon(
                                 imageVector = Icons.Default.EmojiEmotions,
                                 contentDescription = "Emoji",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            "GLOBE" -> Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = "Switch keyboard",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             "SPACE" -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
